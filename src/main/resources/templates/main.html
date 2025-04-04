@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>상품 검색</title>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: sans-serif; margin: 30px; }
+        form > div { margin-bottom: 10px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .pagination a {
+            margin: 0 5px;
+            text-decoration: none;
+            color: blue;
+        }
+        .pagination span.current {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h2>상품 검색</h2>
+
+<form th:action="@{/search}" method="get">
+    <div>
+        <label>검색어 (상품명 or 브랜드):</label>
+        <input type="text" name="keyword" th:value="${keyword}">
+    </div>
+    <div>
+        <label>가격:</label>
+        <input type="number" name="minPrice" placeholder="최소" th:value="${minPrice}">
+        ~
+        <input type="number" name="maxPrice" placeholder="최대" th:value="${maxPrice}">
+    </div>
+    <div>
+        <label>별점:</label>
+        <input type="number" name="minRating" step="0.1" placeholder="최소" th:value="${minRating}">
+        ~
+        <input type="number" name="maxRating" step="0.1" placeholder="최대" th:value="${maxRating}">
+    </div>
+    <div>
+        <label>정렬:</label>
+        <select name="sort">
+            <option value="">-- 선택 --</option>
+            <option value="priceAsc" th:selected="${sort == 'priceAsc'}">가격 오름차순</option>
+            <option value="priceDesc" th:selected="${sort == 'priceDesc'}">가격 내림차순</option>
+            <option value="ratingAsc" th:selected="${sort == 'ratingAsc'}">별점 오름차순</option>
+            <option value="ratingDesc" th:selected="${sort == 'ratingDesc'}">별점 내림차순</option>
+        </select>
+    </div>
+    <div>
+        <button type="submit">검색</button>
+    </div>
+</form>
+
+<hr/>
+
+<div th:if="${products != null}">
+    <div>
+        <strong th:text="|총 결과 수: ${products.totalElements}개|"></strong>
+        <br/>
+        <small th:text="|검색 소요 시간: ${searchTime}ms|"></small>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>상품명</th>
+            <th>브랜드</th>
+            <th>가격</th>
+            <th>별점</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="product : ${products.content}">
+            <td th:text="${product.id}">1</td>
+            <td th:text="${product.name}">상품명</td>
+            <td th:text="${product.brand}">브랜드</td>
+            <td th:text="${product.price}">10000</td>
+            <td th:text="${product.rating}">4.5</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        <span th:each="i : ${#numbers.sequence(0, products.totalPages - 1)}">
+            <a th:if="${i != products.number}"
+               th:href="@{/search(
+                    keyword=${keyword ?: ''},
+                    minPrice=${minPrice ?: ''},
+                    maxPrice=${maxPrice ?: ''},
+                    minRating=${minRating ?: ''},
+                    maxRating=${maxRating ?: ''},
+                    sort=${sort ?: ''},
+                    page=${i},
+                    size=${products.size}
+               )}" th:text="${i + 1}">1</a>
+            <span th:if="${i == products.number}" class="current" th:text="${i + 1}">1</span>
+        </span>
+    </div>
+</div>
+
+</body>
+</html>
